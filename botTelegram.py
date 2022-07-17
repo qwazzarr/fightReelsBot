@@ -2,10 +2,12 @@ import telebot
 from telebot import types
 from scrapeScript import instaBot
 from Phase import Phase
-
+import threading
 import sched
 import time
-import instaCredentials
+#from instaCredentials import LOGIN
+
+from apscheduler.schedulers.background import BackgroundScheduler
 bot = telebot.TeleBot("5526173924:AAGzVz62CQM_OwgjO1O9-0ngGomTKYzPn1I", parse_mode=None)
 
 DATABASE = dict()
@@ -22,12 +24,13 @@ class schedulerBot:
     def __init__(self,chatId):
         self.chatId = chatId
         self.s = None
-        self.scrapeBot = instaBot(login=instaCredentials.LOGIN,pw=instaCredentials.PASSWORD )
+        self.scrapeBot = instaBot()
         self.nicknamesToCheck : list= []
+        self.x = None
         self.loggedIn = False
         self.lastUpdated : dict = None
         self.phase = Phase.BASE
-        self.secondFrequency = 300
+        self.minuteFrequency = 1
 
     def addName(self,name):
         self.nicknamesToCheck.append(name)
@@ -41,13 +44,11 @@ class schedulerBot:
             print(listOfApprovedAccounts[0])
             bot.send_message(self.chatId,"You are not permitted to use this service",reply_markup=self.markup)
             return
-        print(self.scrapeBot)
         self.logIn()
         self.s = sched.scheduler(time.time,time.sleep)
-        self.sendMedia()
-        self.s.run(blocking=False)
+        self.x = threading.Thread(target=self.sendMedia)
+        self.x.start()
     def logIn(self):
-        print(type(self.scrapeBot))
         self.scrapeBot.login()
         self.loggedIn = True
     def sendMedia(self):
@@ -56,7 +57,6 @@ class schedulerBot:
         :return None:
         """
         print("I am called")
-        print(self.scrapeBot.nicknameToCheck)
         if (not self.loggedIn):
             bot.send_message(self.chatId, "Critical error", reply_markup=self.markup)
             return
@@ -66,11 +66,22 @@ class schedulerBot:
             for object in self.lastUpdated[key]:
                 bot.send_message(self.chatId,f"<a href='{object}'>New story from {key}</a>",reply_markup=self.markup,parse_mode='HTML')
         print('here')
-        self.s.enter(10,1,self.sendMedia)
-
-        print(self.s.queue)
+        try:
+            self.s.enter(self.minuteFrequency*60,1,self.sendMedia)
+            self.s.run()
+        except:
+            return
+        #
     def stopTracking(self):
-        self.s.cancel(self.s.queue[0])
+        self.s.empty()
+        self.s = None
+
+    def printQueue(self):
+
+        if(self.s is not None):
+            print(self.s.queue)
+        else:
+            print("None detected")
 
 
 @bot.message_handler(commands=['help'])
@@ -97,11 +108,12 @@ def editAccounts(message):
     markup.add(ADD_SUBSCRIPTION, START_TRACKING, STOP_TRACKING)
     userBot = DATABASE[message.chat.id]
     userBot.phase = Phase.ADD_NAMES
-
+    if(userBot.s):
+        print("Our Jobs:"+str(userBot.s.queue)+" Current time:"+str(time.time()))
     bot.send_message(message.chat.id,"Write an instagramm nickname you want to follow",reply_markup=markup)
 
 @bot.message_handler(regexp=START_TRACKING)
-def starTracking(message):
+def startTracking(message):
     markup = types.ReplyKeyboardMarkup(row_width=1)
     markup.add(ADD_SUBSCRIPTION, START_TRACKING, STOP_TRACKING)
     userBot = DATABASE[message.chat.id]
@@ -109,7 +121,10 @@ def starTracking(message):
 
     userBot.startTracking()
 
-    bot.send_message(message.chat.id,f"Your tracking with frequency {userBot.secondFrequency} has been started")
+
+    userBot.printQueue()
+
+    bot.send_message(message.chat.id,f"Your tracking with frequency {userBot.minuteFrequency} has been started")
 @bot.message_handler(regexp=STOP_TRACKING)
 def stopTracking(message):
     markup = types.ReplyKeyboardMarkup(row_width=1)
@@ -117,7 +132,7 @@ def stopTracking(message):
     userBot = DATABASE[message.chat.id]
     userBot.phase = Phase.BASE
 
-    userBot.startTracking()
+    userBot.stopTracking()
 
     bot.send_message(message.chat.id,"Your tracking has been stopped",reply_markup=markup)
 
@@ -136,5 +151,10 @@ def addName(message):
 
     bot.send_message(message.chat.id,"You can now start tracking or add another name",reply_markup=markup)
 
+@bot.message_handler(func = lambda message : True)
+def anything(message):
+    markup = types.ReplyKeyboardMarkup(row_width=1)
+    markup.add(ADD_SUBSCRIPTION, START_TRACKING, STOP_TRACKING)
+    bot.send_message(message.chat.id, "Nothing here",reply_markup=markup)
 
 bot.infinity_polling()
