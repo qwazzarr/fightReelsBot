@@ -1,3 +1,0 @@
-LOGIN = "truehikka"
-PASSWORD = "Khmaratop0"
-TOKEN = "5526173924:AAGzVz62CQM_OwgjO1O9-0ngGomTKYzPn1I"
