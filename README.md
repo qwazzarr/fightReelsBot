@@ -16,9 +16,9 @@ To start:
 -
 If you want to use the bot, you will need to create a `credentials.py` file and put it in the same directory 
 as `botTelegram.py`. The file should hold 3 variables :
-* `Login` - your instagram login
-* `Password` - your instagram password
-* `Token` - your Telegram Bot token you received from https://t.me/BotFather
+* `LOGIN` - your instagram login
+* `PASSWORD` - your instagram password
+* `TOKEN` - your Telegram Bot token you received from https://t.me/BotFather
 
 The only thing that left is to start `botTelegram.py`
 
