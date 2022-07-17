@@ -1,14 +1,14 @@
 import telebot
 from telebot import types
-from scrapeScript import instaBot
-from Phase import Phase
+from fightReels.scrapeScript import instaBot
+from fightReels.Phase import Phase
 import threading
 import sched
 import time
-#from instaCredentials import LOGIN
+from fightReels.credentials import LOGIN,PASSWORD,TOKEN
 
 from apscheduler.schedulers.background import BackgroundScheduler
-bot = telebot.TeleBot("5526173924:AAGzVz62CQM_OwgjO1O9-0ngGomTKYzPn1I", parse_mode=None)
+bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
 DATABASE = dict()
 
@@ -20,11 +20,11 @@ listOfApprovedAccounts = ["369439350"]
 
 class schedulerBot:
     markup = types.ReplyKeyboardMarkup(row_width=1)
-    markup.add('Edit followed accounts', 'Start tracking', 'Stop tracking')
+    markup.add(ADD_SUBSCRIPTION, START_TRACKING, STOP_TRACKING)
     def __init__(self,chatId):
         self.chatId = chatId
         self.s = None
-        self.scrapeBot = instaBot()
+        self.scrapeBot = instaBot(login=LOGIN,pw=PASSWORD)
         self.nicknamesToCheck : list= []
         self.x = None
         self.loggedIn = False
@@ -36,13 +36,14 @@ class schedulerBot:
         self.nicknamesToCheck.append(name)
         self.scrapeBot.changeNames(self.nicknamesToCheck)
     def startTracking(self):
-        if(not self.nicknamesToCheck):
-            bot.send_message(self.chatId,"You need too follow to somebody",reply_markup=self.markup)
-            return
-        if(str(self.chatId) not in listOfApprovedAccounts):
+        if (str(self.chatId) not in listOfApprovedAccounts):
             print(self.chatId)
             print(listOfApprovedAccounts[0])
-            bot.send_message(self.chatId,"You are not permitted to use this service",reply_markup=self.markup)
+            bot.send_message(self.chatId, "Unfortunately , You are not permitted to use this service. Contact @Qwazzarr",
+                             reply_markup=self.markup)
+            return
+        if(not self.nicknamesToCheck):
+            bot.send_message(self.chatId,"You need too follow to somebody",reply_markup=self.markup)
             return
         self.logIn()
         self.s = sched.scheduler(time.time,time.sleep)
@@ -73,8 +74,12 @@ class schedulerBot:
             return
         #
     def stopTracking(self):
-        self.s.empty()
-        self.s = None
+        if(self.s is not None):
+            self.s.empty()
+            self.s = None
+            return True
+        else:
+            return False
 
     def printQueue(self):
 
@@ -106,37 +111,52 @@ def start(message):
 def editAccounts(message):
     markup = types.ReplyKeyboardMarkup(row_width=1)
     markup.add(ADD_SUBSCRIPTION, START_TRACKING, STOP_TRACKING)
+    if (message.chat.id not in DATABASE):
+        bot.send_message(message.chat.id, "Type /start to start!", reply_markup=markup)
+        return
     userBot = DATABASE[message.chat.id]
     userBot.phase = Phase.ADD_NAMES
     if(userBot.s):
         print("Our Jobs:"+str(userBot.s.queue)+" Current time:"+str(time.time()))
-    bot.send_message(message.chat.id,"Write an instagramm nickname you want to follow",reply_markup=markup)
+    bot.send_message(message.chat.id,"Write an instagram nickname you want to follow!",reply_markup=markup)
 
 @bot.message_handler(regexp=START_TRACKING)
 def startTracking(message):
     markup = types.ReplyKeyboardMarkup(row_width=1)
     markup.add(ADD_SUBSCRIPTION, START_TRACKING, STOP_TRACKING)
+    if (message.chat.id not in DATABASE):
+        bot.send_message(message.chat.id, "Type /start to start!", reply_markup=markup)
+        return
     userBot = DATABASE[message.chat.id]
     userBot.phase = Phase.BASE
+
+    bot.send_message(message.chat.id, f"Your tracking with frequency {userBot.minuteFrequency} minutes has been started.")
 
     userBot.startTracking()
 
 
     userBot.printQueue()
 
-    bot.send_message(message.chat.id,f"Your tracking with frequency {userBot.minuteFrequency} has been started")
 @bot.message_handler(regexp=STOP_TRACKING)
 def stopTracking(message):
     markup = types.ReplyKeyboardMarkup(row_width=1)
     markup.add(ADD_SUBSCRIPTION, START_TRACKING, STOP_TRACKING)
+
+    if(message.chat.id not in DATABASE):
+        bot.send_message(message.chat.id, "Type /start to start!", reply_markup=markup)
+        return
     userBot = DATABASE[message.chat.id]
     userBot.phase = Phase.BASE
 
-    userBot.stopTracking()
-
+    flag = userBot.stopTracking()
+    if(not flag):
+        bot.send_message(message.chat.id, "There is no tracking man", reply_markup=markup)
+        return
     bot.send_message(message.chat.id,"Your tracking has been stopped",reply_markup=markup)
 
 def getPhase(message):
+    if(message.chat.id not in DATABASE):
+        return Phase.UNDEFINED
     userBot = DATABASE[message.chat.id]
     return userBot.phase
 
