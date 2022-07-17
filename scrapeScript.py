@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException
 from time import sleep
-
+from .credentials import PATH_TO_DRIVER
 from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -36,14 +36,14 @@ class instaBot:
         self.nicknameToCheck = nicknameToCheck
 
     def login(self):
-        self.driver = Chrome(executable_path="/Users/arseniikhmara/Documents/Motiontailor/chromedriver-2",chrome_options=chrome_options)
+        self.driver = Chrome(executable_path=PATH_TO_DRIVER,chrome_options=chrome_options)
         self.driver.get("https://instagram.com")
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/button[1]"))).click()
         WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR,
-                                                                    "input[name='username']"))).send_keys(LOGIN)
+                                                                    "input[name='username']"))).send_keys(self.LOGIN)
         WebDriverWait(self.driver, 15).until(EC.element_to_be_clickable((By.CSS_SELECTOR,
-                                                                    "input[name='password']"))).send_keys(PW)
+                                                                    "input[name='password']"))).send_keys(self.PW)
         sleep(1)
         WebDriverWait(self.driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
         WebDriverWait(self.driver, 10).until(

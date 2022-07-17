@@ -19,6 +19,7 @@ as `botTelegram.py`. The file should hold 3 variables :
 * `LOGIN` - your instagram login
 * `PASSWORD` - your instagram password
 * `TOKEN` - your Telegram Bot token you received from https://t.me/BotFather
+* `PATH_TO_DRIVER` - the location of google drivers for selenium
 
 The only thing that left is to start `botTelegram.py`
 
