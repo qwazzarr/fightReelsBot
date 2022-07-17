@@ -14,10 +14,8 @@ chrome_options.add_experimental_option("detach", True)
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 
-LOGIN = "truehikka"
-PW = "Khmaratop0"
 
-NicknameToCheck = ['flydota','vrzja']
+NicknameToCheck = []
 
 stopButtonXpath = "/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/div[1]/div/div[5]/section/div/header/div[2]/div[2]/button[1]"
 storyContentXpath = "/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/div[1]/div/div[5]/section/div/div[1]/div/div/img"
@@ -27,7 +25,7 @@ storyVideoXpath = "/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/di
 nextMenuButtonInit ="/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/main/section/div/div[2]/div/div/button"
 nextMenuButtonAfter ="/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/main/section/div/div[2]/div/div/button[2]"
 class instaBot:
-    def __init__(self,nicknameToCheck = NicknameToCheck,login = LOGIN, pw = PW):
+    def __init__(self,nicknameToCheck = NicknameToCheck,login = "", pw =""):
         self.nicknameToCheck = nicknameToCheck
         self.LOGIN = login
         self.PW = pw
@@ -113,65 +111,3 @@ class instaBot:
 
         self.driver.get("https://instagram.com")
         return nicknamesToStories
-
-
-
-
-
-# driver = Chrome(executable_path="/Users/arseniikhmara/Documents/Motiontailor/chromedriver-2")
-# driver.get("https://instagram.com")
-# WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/button[1]"))).click()
-# WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR,
-#                                                             "input[name='username']"))).send_keys(LOGIN)
-# WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CSS_SELECTOR,
-#                                                             "input[name='password']"))).send_keys(PW)
-# sleep(1)
-# WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
-# WebDriverWait(driver, 10).until(
-#     EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/section/main/div/div/div/div/button"))).click()
-# WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,
-#                                                             "/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div/div[3]/button[2]"))).click()
-# sleep(2)
-
-# nicknamesToBeChecked = set(NicknameToCheck)
-# nicknamesToStories = {name: [] for name in nicknamesToBeChecked}
-# while (len(nicknamesToBeChecked) != 0):
-#     checkedNames = set()
-#
-#     for name in nicknamesToBeChecked:
-#         result = driver.find_elements(By.CSS_SELECTOR, "button[aria-label='Story by " + name + ", not seen']")
-#         if (len(result) != 0):
-#             try:
-#                 result[0].click()
-#             except:
-#                 break
-#
-#             nextButton = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.
-#                                                                                         XPATH, nextButtonXpath)))
-#             closeButton = driver.find_element(By.XPATH, closeButtonXpath)
-#             stopButton = driver.find_element(By.XPATH, stopButtonXpath)
-#
-#             while (len(driver.find_elements(By.CSS_SELECTOR, f"a[href='/{name}/']")) != 0):
-#                 stopButton.click()
-#                 content = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.
-#                                                                                          XPATH,
-#                                                                                          storyContentXpath))).get_attribute(
-#                     "srcset").split(",")[0][:-5]
-#                 nicknamesToStories[name].append(content)
-#                 sleep(0.1)
-#                 nextButton.click()
-#             else:
-#                 closeButton.click()
-#             checkedNames.add(name)
-#             sleep(1)
-#     for name in checkedNames:
-#         nicknamesToBeChecked.remove(name)
-#     try:
-#         WebDriverWait(driver, 5).until(
-#             EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Next']"))).click()
-#         sleep(0.5)
-#     except:
-#         print('No new stories')
-#         break
-#
-# print(nicknamesToStories)
