@@ -23,7 +23,8 @@ nextButtonXpath = "/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/di
 closeButtonXpath = "/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/div[3]/button"
 storyVideoXpath = "/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/div[1]/div/div[5]/section/div/div[1]/div/div/video/source"
 nextMenuButtonInit ="/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/main/section/div/div[2]/div/div/button"
-nextMenuButtonAfter ="/html/body/div[1]/div/div[1]/div/div[1]/div/div/div/div[1]/div[1]/section/main/section/div/div[2]/div/div/button[2]"
+nextMenuButtonAfter ="/html/body/div[1]/div/div/div/div[1]/div/div/div/div[1]/div[1]/section/main/div[1]/section/div/div[2]/div/div/button[2]"
+
 class instaBot:
     def __init__(self,nicknameToCheck = NicknameToCheck,login = "", pw =""):
         self.nicknameToCheck = nicknameToCheck
@@ -48,8 +49,11 @@ class instaBot:
         WebDriverWait(self.driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/section/main/div/div/div/div/button"))).click()
-        #WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH,
-                                                                    #"/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div/div[3]/button[2]"))).click()
+        try:
+            WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH,
+                    "/html/body/div[1]/div/div[1]/div/div[2]/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div/div[3]/button[2]"))).click()
+        except:
+            pass
         sleep(2)
 
     def checkStories(self) -> dict:
@@ -97,14 +101,21 @@ class instaBot:
                 if(len(self.driver.find_elements(By.XPATH, nextMenuButtonAfter)) != 0):
                     self.nextMenuButton = self.driver.find_elements(By.XPATH, nextMenuButtonAfter)[0]
                     self.firstClicked = True
-                    #print("Transfer to alternative")
+                    print("Transfer to alternative")
                 else:
-                    self.nextMenuButton = self.driver.find_element(By.CSS_SELECTOR, "button[aria-label='Next']")
-                    #print("Back to orig")
+
+                    #print("XPATH:"+str(self.driver.find_elements(By.XPATH, nextMenuButtonAfter)))
+                    try:
+                        self.nextMenuButton = self.driver.find_element(By.CSS_SELECTOR, "button[aria-label='Next']")
+                    except:
+                        print("Error - refreshing the page")
+                    print("Back to orig")
+
             try:
                 self.nextMenuButton.click()
-                sleep(2)
+                sleep(1)
             except Exception as e:
+                self.firstClicked =False
                 print("Exception:"+str(e))
                 print('No new stories')
                 break

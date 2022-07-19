@@ -37,8 +37,7 @@ class schedulerBot:
         self.scrapeBot.changeNames(self.nicknamesToCheck)
     def startTracking(self):
         if (str(self.chatId) not in listOfApprovedAccounts):
-            print(self.chatId)
-            print(listOfApprovedAccounts[0])
+            print("Outsider is banging on our doors:"+str(self.chatId))
             bot.send_message(self.chatId, "Unfortunately , You are not permitted to use this service. Contact @Qwazzarr",
                              reply_markup=self.markup)
             return
@@ -134,8 +133,6 @@ def startTracking(message):
 
     userBot.startTracking()
 
-
-    userBot.printQueue()
 
 @bot.message_handler(regexp=STOP_TRACKING)
 def stopTracking(message):
