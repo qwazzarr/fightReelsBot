@@ -60,6 +60,7 @@ class instaBot:
         nicknamesToBeChecked = set(self.nicknameToCheck)
         nicknamesToStories = {name: [] for name in nicknamesToBeChecked}
         self.nextMenuButton = self.driver.find_element(By.CSS_SELECTOR, "button[aria-label='Next']")
+        self.firstClicked = False
         while (len(nicknamesToBeChecked) != 0):
             checkedNames = set()
             sleep(2)
@@ -115,7 +116,6 @@ class instaBot:
                 self.nextMenuButton.click()
                 sleep(1)
             except Exception as e:
-                self.firstClicked =False
                 print("Exception:"+str(e))
                 print('No new stories')
                 break
